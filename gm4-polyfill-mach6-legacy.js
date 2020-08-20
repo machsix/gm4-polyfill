@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name         gm4-polyfill-mach6-legacy
 // @description  This utility is designed to ease authoring user scripts compatible with both Greasemonkey 4 and other/older user script engines.
-// @version      1.2
-// @namespace    https://github.com/machsix/gm4-polyfill-mach6-legacy
+// @version      2.0
+// @namespace    https://github.com/machsix/gm4-polyfill
 // @author       mach6
+// @license      GPL
 // ==/UserScript==
 
 /*
@@ -98,7 +99,7 @@ if (typeof GM_getResourceText == "undefined") {
 }
 
 // polyfill for GM3
-if (typeof GM_notification === "undefined") {
+if (typeof GM_notification === "undefined" || GM_notification === null) {
   this.GM_notification = function(options) {
     const opts = {};
     if (typeof options === "string") {
@@ -161,12 +162,10 @@ if (!Object.entries) {
 
 Object.entries({
   log: console.log.bind(console),
-  // Pale Moon compatibility.  See #13.
-  info: GM_info
 }).forEach(function(values) {
   var newKey = values[0];
   var old = values[1];
-  if (old && typeof GM[newKey] == "undefined") {
+  if (typeof GM[newKey] === "undefined") {
     GM[newKey] = old;
   }
 });
@@ -211,6 +210,23 @@ Object.entries({
     }
   }.bind(this)
 );
+
+// Adguard or other script manager which don't inject functions to window
+if (typeof GM.getValue === "undefined" && typeof GM_getValue === "function") {
+  GM.getValue = GM_getValue;
+}
+if (typeof GM.setValue === "undefined" && typeof GM_setValue === "function") {
+  GM.setValue = GM_setValue;
+}
+if (typeof GM.xmlHttpRequest === "undefined" && typeof GM_xmlhttpRequest === "function") {
+  GM.xmlHttpRequest = GM_xmlhttpRequest;
+}
+if (typeof GM.registerMenuCommand === "undefined" && typeof GM_registerMenuCommand === "function") {
+  GM.registerMenuCommand = GM_registerMenuCommand;
+}
+if (typeof GM.info === "undefined" && typeof GM_info === "object") {
+  GM.info = GM_info;
+}
 
 // https://stackoverflow.com/questions/36779883/userscript-notifications-work-on-chrome-but-not-firefox
 // if (typeof GM.notification == "undefined") {
